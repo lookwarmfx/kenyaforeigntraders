@@ -31,7 +31,7 @@ const Deposit = () => {
     const started = Date.now();
     pollRef.current = window.setInterval(async () => {
       try {
-        const { data } = await supabase.functions.invoke("onasis-status", { body: { reference } });
+        const { data } = await supabase.functions.invoke("lipwa-status", { body: { reference } });
         if (data?.status === "completed") {
           window.clearInterval(pollRef.current!);
           setStage("success");
