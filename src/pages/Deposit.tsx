@@ -69,7 +69,7 @@ const Deposit = () => {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session) { toast.error("Please log in first"); navigate("/login"); return; }
 
-      const { data, error } = await supabase.functions.invoke("onasis-stk-push", {
+      const { data, error } = await supabase.functions.invoke("lipwa-stk-push", {
         body: { amount_usd: usd, phone: phone.trim() },
       });
       if (error) throw error;
