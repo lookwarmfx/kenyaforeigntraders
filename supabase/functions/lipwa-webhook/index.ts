@@ -28,20 +28,19 @@ Deno.serve(async (req) => {
     ).toLowerCase();
 
     const mpesaReceipt =
+      (data?.mpesa_code as string) ??
       (data?.mpesa_receipt as string) ??
       (data?.mpesa_reference as string) ??
       (data?.receipt as string) ??
+      (event?.mpesa_code as string) ??
       (event?.mpesa_receipt as string) ??
       null;
 
     if (!reference) throw new Error("Missing api_ref/reference in payload");
 
-    const status =
-      rawStatus === "success" || rawStatus === "completed" || rawStatus === "successful" || rawStatus === "paid"
-        ? "completed"
-        : rawStatus === "failed" || rawStatus === "cancelled" || rawStatus === "canceled" || rawStatus === "error"
-          ? "failed"
-          : "pending";
+    const isSuccess = rawStatus.includes("success") || rawStatus === "completed" || rawStatus === "successful" || rawStatus === "paid" || rawStatus === "payment.success";
+    const isFailed = rawStatus.includes("fail") || rawStatus.includes("cancel") || rawStatus.includes("error");
+    const status = isSuccess ? "completed" : isFailed ? "failed" : "pending";
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
