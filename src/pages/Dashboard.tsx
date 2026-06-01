@@ -162,7 +162,7 @@ const Dashboard = () => {
     const started = Date.now();
     depositPollRef.current = window.setInterval(async () => {
       try {
-        const { data } = await supabase.functions.invoke("onasis-status", { body: { reference } });
+        const { data } = await supabase.functions.invoke("lipwa-status", { body: { reference } });
         if (data?.status === "completed") {
           window.clearInterval(depositPollRef.current!);
           setDepositStage("success");
@@ -197,7 +197,7 @@ const Dashboard = () => {
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session) { toast.error("Please log in first"); navigate("/login"); return; }
-      const { data, error } = await supabase.functions.invoke("onasis-stk-push", {
+      const { data, error } = await supabase.functions.invoke("lipwa-stk-push", {
         body: { amount_usd: usd, phone: depositPhone.trim() },
       });
       if (error) throw error;
