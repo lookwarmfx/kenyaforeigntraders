@@ -613,7 +613,7 @@ const AdminDashboard = () => {
                                 variant="outline"
                                 size="sm"
                                 className="h-7 px-2 text-[10px] border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                                onClick={() => handleWithdrawalAction(w.id, "reject")}
+                                onClick={() => { setRejectingWithdrawal(w); setRejectReason(""); }}
                                 disabled={processingWithdrawal === w.id}
                               >
                                 <X className="w-3 h-3 mr-1" /> Reject
