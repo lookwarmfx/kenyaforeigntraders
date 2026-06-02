@@ -795,6 +795,49 @@ const AdminDashboard = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Reject Withdrawal Dialog */}
+      <Dialog open={!!rejectingWithdrawal} onOpenChange={(open) => { if (!open) { setRejectingWithdrawal(null); setRejectReason(""); } }}>
+        <DialogContent className="bg-card border-border max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">Reject Withdrawal</DialogTitle>
+          </DialogHeader>
+          {rejectingWithdrawal && (
+            <div className="space-y-3">
+              <div className="rounded-lg bg-secondary/50 p-3 text-xs">
+                <p className="text-foreground font-semibold">{getNameForUser(rejectingWithdrawal.user_id)}</p>
+                <p className="text-muted-foreground">
+                  ${Number(rejectingWithdrawal.amount_usd).toFixed(2)} • KSH {Number(rejectingWithdrawal.amount_kes).toLocaleString()}
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="rejectReason" className="text-xs">Reason for rejection <span className="text-destructive">*</span></Label>
+                <Textarea
+                  id="rejectReason"
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="e.g. Insufficient balance, invalid phone number, suspicious activity..."
+                  className="bg-secondary border-border mt-1 min-h-[100px]"
+                  maxLength={500}
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  This reason will be saved and visible to the user.
+                </p>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => { setRejectingWithdrawal(null); setRejectReason(""); }} className="border-border">Cancel</Button>
+            <Button
+              variant="destructive"
+              onClick={() => rejectingWithdrawal && handleWithdrawalAction(rejectingWithdrawal.id, "reject", rejectReason)}
+              disabled={!rejectReason.trim() || processingWithdrawal === rejectingWithdrawal?.id}
+            >
+              {processingWithdrawal === rejectingWithdrawal?.id ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirm Reject"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
