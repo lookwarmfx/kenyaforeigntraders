@@ -582,7 +582,7 @@ const AdminDashboard = () => {
                             {w.status}
                           </span>
                         </div>
-                        <div className="flex items-end justify-between">
+                        <div className="flex flex-wrap items-end justify-between gap-3">
                           <div>
                             <p className="text-[10px] text-muted-foreground uppercase">Amount</p>
                             <p className="text-sm font-bold text-foreground">
@@ -593,17 +593,17 @@ const AdminDashboard = () => {
                             </p>
                           </div>
                           {w.status === "pending" && (
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
                               <Input
                                 placeholder="Notes (optional)"
                                 value={processingWithdrawal === w.id ? adminNotes : ""}
                                 onChange={(e) => { setProcessingWithdrawal(w.id); setAdminNotes(e.target.value); }}
-                                className="bg-secondary border-border h-7 text-[10px] w-24"
+                                className="bg-secondary border-border h-7 text-[10px] w-full sm:w-28"
                               />
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-7 px-2 text-[10px] border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                                className="h-7 px-2 text-[10px] flex-1 sm:flex-none border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                                 onClick={() => handleWithdrawalAction(w.id, "approve")}
                                 disabled={processingWithdrawal === w.id}
                               >
@@ -612,7 +612,7 @@ const AdminDashboard = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-7 px-2 text-[10px] border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                                className="h-7 px-2 text-[10px] flex-1 sm:flex-none border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
                                 onClick={() => { setRejectingWithdrawal(w); setRejectReason(""); }}
                                 disabled={processingWithdrawal === w.id}
                               >
@@ -635,6 +635,7 @@ const AdminDashboard = () => {
                             </Button>
                           )}
                         </div>
+
                         {w.admin_notes && (
                           <p className="text-[10px] text-muted-foreground mt-2 italic">Note: {w.admin_notes}</p>
                         )}
