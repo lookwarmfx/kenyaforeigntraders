@@ -175,19 +175,26 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleWithdrawalAction = async (withdrawalId: string, action: "approve" | "reject") => {
+  const handleWithdrawalAction = async (withdrawalId: string, action: "approve" | "reject", reasonOverride?: string) => {
     setProcessingWithdrawal(withdrawalId);
     try {
       if (action === "reject") {
+        const reason = (reasonOverride ?? "").trim();
+        if (!reason) {
+          toast.error("Please provide a reason for rejection");
+          return;
+        }
         const { error } = await supabase
           .from("withdrawals")
-          .update({ status: "rejected", admin_notes: adminNotes || null })
+          .update({ status: "rejected", admin_notes: reason })
           .eq("id", withdrawalId);
         if (error) throw error;
         setWithdrawals((prev) =>
-          prev.map((w) => w.id === withdrawalId ? { ...w, status: "rejected", admin_notes: adminNotes || null } : w)
+          prev.map((w) => w.id === withdrawalId ? { ...w, status: "rejected", admin_notes: reason } : w)
         );
         toast.success("Withdrawal rejected");
+        setRejectingWithdrawal(null);
+        setRejectReason("");
       } else {
         // Approve = mark for manual M-Pesa send-money by admin
         const { error } = await supabase
