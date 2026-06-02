@@ -81,6 +81,8 @@ const AdminDashboard = () => {
   const [processingWithdrawal, setProcessingWithdrawal] = useState<string | null>(null);
   const [completingWithdrawal, setCompletingWithdrawal] = useState<string | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
+  const [rejectingWithdrawal, setRejectingWithdrawal] = useState<Withdrawal | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
   const [adjustingUserId, setAdjustingUserId] = useState<string | null>(null);
   const [newBalanceValue, setNewBalanceValue] = useState("");
   const [savingBalance, setSavingBalance] = useState(false);
