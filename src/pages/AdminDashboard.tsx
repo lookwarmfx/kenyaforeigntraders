@@ -81,6 +81,8 @@ const AdminDashboard = () => {
   const [processingWithdrawal, setProcessingWithdrawal] = useState<string | null>(null);
   const [completingWithdrawal, setCompletingWithdrawal] = useState<string | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
+  const [rejectingWithdrawal, setRejectingWithdrawal] = useState<Withdrawal | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
   const [adjustingUserId, setAdjustingUserId] = useState<string | null>(null);
   const [newBalanceValue, setNewBalanceValue] = useState("");
   const [savingBalance, setSavingBalance] = useState(false);
@@ -173,19 +175,26 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleWithdrawalAction = async (withdrawalId: string, action: "approve" | "reject") => {
+  const handleWithdrawalAction = async (withdrawalId: string, action: "approve" | "reject", reasonOverride?: string) => {
     setProcessingWithdrawal(withdrawalId);
     try {
       if (action === "reject") {
+        const reason = (reasonOverride ?? "").trim();
+        if (!reason) {
+          toast.error("Please provide a reason for rejection");
+          return;
+        }
         const { error } = await supabase
           .from("withdrawals")
-          .update({ status: "rejected", admin_notes: adminNotes || null })
+          .update({ status: "rejected", admin_notes: reason })
           .eq("id", withdrawalId);
         if (error) throw error;
         setWithdrawals((prev) =>
-          prev.map((w) => w.id === withdrawalId ? { ...w, status: "rejected", admin_notes: adminNotes || null } : w)
+          prev.map((w) => w.id === withdrawalId ? { ...w, status: "rejected", admin_notes: reason } : w)
         );
         toast.success("Withdrawal rejected");
+        setRejectingWithdrawal(null);
+        setRejectReason("");
       } else {
         // Approve = mark for manual M-Pesa send-money by admin
         const { error } = await supabase
@@ -604,7 +613,7 @@ const AdminDashboard = () => {
                                 variant="outline"
                                 size="sm"
                                 className="h-7 px-2 text-[10px] border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                                onClick={() => handleWithdrawalAction(w.id, "reject")}
+                                onClick={() => { setRejectingWithdrawal(w); setRejectReason(""); }}
                                 disabled={processingWithdrawal === w.id}
                               >
                                 <X className="w-3 h-3 mr-1" /> Reject
@@ -782,6 +791,49 @@ const AdminDashboard = () => {
             <Button variant="outline" onClick={() => setAdjustingUserId(null)} className="border-border">Cancel</Button>
             <Button onClick={handleSaveBalance} disabled={savingBalance} className="bg-[hsl(280,70%,55%)] hover:bg-[hsl(280,70%,45%)]">
               {savingBalance ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Balance"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reject Withdrawal Dialog */}
+      <Dialog open={!!rejectingWithdrawal} onOpenChange={(open) => { if (!open) { setRejectingWithdrawal(null); setRejectReason(""); } }}>
+        <DialogContent className="bg-card border-border max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">Reject Withdrawal</DialogTitle>
+          </DialogHeader>
+          {rejectingWithdrawal && (
+            <div className="space-y-3">
+              <div className="rounded-lg bg-secondary/50 p-3 text-xs">
+                <p className="text-foreground font-semibold">{getNameForUser(rejectingWithdrawal.user_id)}</p>
+                <p className="text-muted-foreground">
+                  ${Number(rejectingWithdrawal.amount_usd).toFixed(2)} • KSH {Number(rejectingWithdrawal.amount_kes).toLocaleString()}
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="rejectReason" className="text-xs">Reason for rejection <span className="text-destructive">*</span></Label>
+                <Textarea
+                  id="rejectReason"
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="e.g. Insufficient balance, invalid phone number, suspicious activity..."
+                  className="bg-secondary border-border mt-1 min-h-[100px]"
+                  maxLength={500}
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  This reason will be saved and visible to the user.
+                </p>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => { setRejectingWithdrawal(null); setRejectReason(""); }} className="border-border">Cancel</Button>
+            <Button
+              variant="destructive"
+              onClick={() => rejectingWithdrawal && handleWithdrawalAction(rejectingWithdrawal.id, "reject", rejectReason)}
+              disabled={!rejectReason.trim() || processingWithdrawal === rejectingWithdrawal?.id}
+            >
+              {processingWithdrawal === rejectingWithdrawal?.id ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirm Reject"}
             </Button>
           </DialogFooter>
         </DialogContent>
