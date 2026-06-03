@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { GoldTicker } from "@/components/GoldTicker";
 
 const PROFIT_RATE = 0.5;       // 50%
 const PROFIT_DELAY_MS = 30 * 60 * 1000; // 30 minutes in ms
@@ -395,6 +396,11 @@ const Dashboard = () => {
             </motion.div>
           ))}
         </div>
+
+        {/* Live Gold Price */}
+        <motion.div initial="hidden" animate="visible" variants={fadeIn} custom={4} className="mb-4">
+          <GoldTicker />
+        </motion.div>
 
         {/* Tabs */}
         <motion.div initial="hidden" animate="visible" variants={fadeIn} custom={5}>
