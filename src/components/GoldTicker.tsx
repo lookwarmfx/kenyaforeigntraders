@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { TrendingUp, TrendingDown, Activity } from "lucide-react";
+import { TrendingUp, TrendingDown, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface GoldPrice {
@@ -45,7 +46,8 @@ export const GoldTicker = () => {
   const pct = data && prev ? (delta / prev) * 100 : 0;
 
   return (
-    <Card className="border-border bg-gradient-to-br from-card via-card to-secondary/30 overflow-hidden relative">
+    <Link to="/gold" className="block group">
+    <Card className="border-border bg-gradient-to-br from-card via-card to-secondary/30 overflow-hidden relative transition-all group-hover:border-primary/40 group-hover:shadow-lg group-hover:shadow-primary/10 cursor-pointer">
       <div className="absolute top-0 right-0 w-32 h-32 bg-[hsl(45,90%,55%)]/10 rounded-full blur-3xl pointer-events-none" />
       <CardContent className="p-4 relative">
         <div className="flex items-center justify-between mb-2">
@@ -64,7 +66,7 @@ export const GoldTicker = () => {
               </p>
             </div>
           </div>
-          <Activity className="w-4 h-4 text-muted-foreground" />
+          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
         </div>
 
         {loading ? (
@@ -109,6 +111,7 @@ export const GoldTicker = () => {
         ) : null}
       </CardContent>
     </Card>
+    </Link>
   );
 };
 
