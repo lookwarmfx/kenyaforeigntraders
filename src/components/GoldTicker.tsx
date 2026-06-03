@@ -66,7 +66,7 @@ export const GoldTicker = () => {
               </p>
             </div>
           </div>
-          <Activity className="w-4 h-4 text-muted-foreground" />
+          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
         </div>
 
         {loading ? (
@@ -111,6 +111,7 @@ export const GoldTicker = () => {
         ) : null}
       </CardContent>
     </Card>
+    </Link>
   );
 };
 
