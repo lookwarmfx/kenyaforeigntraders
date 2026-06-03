@@ -621,18 +621,29 @@ const AdminDashboard = () => {
                             </div>
                           )}
                           {(w.status === "approved" || w.status === "processing") && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-7 px-2.5 text-[10px] border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-                              onClick={() => handleMarkCompleted(w.id, Number(w.amount_kes), w.user_id)}
-                              disabled={completingWithdrawal === w.id}
-                            >
-                              {completingWithdrawal === w.id
-                                ? <Loader2 className="w-3 h-3 animate-spin" />
-                                : <><CheckCircle2 className="w-3 h-3 mr-1" /> Mark Completed</>
-                              }
-                            </Button>
+                            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 px-2.5 text-[10px] flex-1 sm:flex-none border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                                onClick={() => handleMarkCompleted(w.id, Number(w.amount_kes), w.user_id)}
+                                disabled={completingWithdrawal === w.id || processingWithdrawal === w.id}
+                              >
+                                {completingWithdrawal === w.id
+                                  ? <Loader2 className="w-3 h-3 animate-spin" />
+                                  : <><CheckCircle2 className="w-3 h-3 mr-1" /> Mark Completed</>
+                                }
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 px-2 text-[10px] flex-1 sm:flex-none border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                                onClick={() => { setRejectingWithdrawal(w); setRejectReason(""); }}
+                                disabled={completingWithdrawal === w.id || processingWithdrawal === w.id}
+                              >
+                                <X className="w-3 h-3 mr-1" /> Reject
+                              </Button>
+                            </div>
                           )}
                         </div>
 
