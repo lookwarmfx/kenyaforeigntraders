@@ -127,7 +127,7 @@ const Dashboard = () => {
     init();
 
     const channel = supabase
-      .channel("deposits-realtime")
+      .channel("dashboard-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "deposits" }, (payload) => {
         if (payload.eventType === "INSERT") {
           setDeposits((prev) => {
@@ -139,6 +139,17 @@ const Dashboard = () => {
           setDeposits((prev) =>
             prev.map((d) => d.id === (payload.new as any).id ? payload.new as any : d)
           );
+        }
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "withdrawals" }, (payload) => {
+        if (payload.eventType === "INSERT") {
+          setWithdrawals((prev) => [payload.new as any, ...prev]);
+        } else if (payload.eventType === "UPDATE") {
+          setWithdrawals((prev) =>
+            prev.map((w) => w.id === (payload.new as any).id ? payload.new as any : w)
+          );
+        } else if (payload.eventType === "DELETE") {
+          setWithdrawals((prev) => prev.filter((w) => w.id !== (payload.old as any).id));
         }
       })
       .subscribe();
