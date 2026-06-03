@@ -127,7 +127,7 @@ const Dashboard = () => {
     init();
 
     const channel = supabase
-      .channel("deposits-realtime")
+      .channel("dashboard-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "deposits" }, (payload) => {
         if (payload.eventType === "INSERT") {
           setDeposits((prev) => {
@@ -139,6 +139,17 @@ const Dashboard = () => {
           setDeposits((prev) =>
             prev.map((d) => d.id === (payload.new as any).id ? payload.new as any : d)
           );
+        }
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "withdrawals" }, (payload) => {
+        if (payload.eventType === "INSERT") {
+          setWithdrawals((prev) => [payload.new as any, ...prev]);
+        } else if (payload.eventType === "UPDATE") {
+          setWithdrawals((prev) =>
+            prev.map((w) => w.id === (payload.new as any).id ? payload.new as any : w)
+          );
+        } else if (payload.eventType === "DELETE") {
+          setWithdrawals((prev) => prev.filter((w) => w.id !== (payload.old as any).id));
         }
       })
       .subscribe();
@@ -624,24 +635,32 @@ const Dashboard = () => {
                     <div className="mt-3 space-y-2">
                       <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Recent Withdrawals</p>
                       {withdrawals.slice(0, 5).map((w: any) => (
-                        <div key={w.id} className="flex justify-between items-center p-2.5 rounded-lg bg-secondary/50">
-                          <div>
-                            <p className="text-xs font-medium text-foreground">Withdrawal</p>
-                            <p className="text-[10px] text-muted-foreground">
-                              {new Date(w.created_at).toLocaleDateString()} •{" "}
-                              <span className={
-                                w.status === "completed" ? "text-primary" :
-                                w.status === "approved" ? "text-[hsl(210,80%,55%)]" :
-                                w.status === "rejected" ? "text-destructive" :
-                                "text-[hsl(var(--warning))]"
-                              }>
-                                {w.status}
-                              </span>
+                        <div key={w.id} className="p-2.5 rounded-lg bg-secondary/50 space-y-2">
+                          <div className="flex justify-between items-start gap-3">
+                            <div className="min-w-0">
+                              <p className="text-xs font-medium text-foreground">Withdrawal</p>
+                              <p className="text-[10px] text-muted-foreground">
+                                {new Date(w.created_at).toLocaleDateString()} •{" "}
+                                <span className={
+                                  w.status === "completed" ? "text-primary" :
+                                  w.status === "approved" ? "text-[hsl(210,80%,55%)]" :
+                                  w.status === "rejected" ? "text-destructive" :
+                                  "text-[hsl(var(--warning))]"
+                                }>
+                                  {w.status}
+                                </span>
+                              </p>
+                            </div>
+                            <p className="text-sm font-semibold text-foreground shrink-0">
+                              KSH {Number(w.amount_kes).toLocaleString()}
                             </p>
                           </div>
-                          <p className="text-sm font-semibold text-foreground">
-                            KSH {Number(w.amount_kes).toLocaleString()}
-                          </p>
+                          {w.status === "rejected" && w.admin_notes && (
+                            <div className="rounded-md border border-destructive/20 bg-destructive/10 p-2">
+                              <p className="text-[10px] font-semibold uppercase text-destructive">Reason</p>
+                              <p className="mt-0.5 text-xs text-foreground break-words">{w.admin_notes}</p>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
