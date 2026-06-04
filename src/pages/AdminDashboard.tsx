@@ -14,8 +14,12 @@ import {
   Users, DollarSign, TrendingUp, Clock, Search,
   LogOut, Shield, Loader2, Edit, Activity,
   UserCheck, CreditCard, ArrowUpRight, ArrowDownLeft,
-  Check, X, CheckCircle2, Phone, Wallet,
+  Check, X, CheckCircle2, Phone, Wallet, Trash2,
 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
@@ -86,6 +90,30 @@ const AdminDashboard = () => {
   const [adjustingUserId, setAdjustingUserId] = useState<string | null>(null);
   const [newBalanceValue, setNewBalanceValue] = useState("");
   const [savingBalance, setSavingBalance] = useState(false);
+  const [deletingUser, setDeletingUser] = useState<Profile | null>(null);
+  const [isDeletingUser, setIsDeletingUser] = useState(false);
+
+  const handleDeleteUser = async () => {
+    if (!deletingUser) return;
+    setIsDeletingUser(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const { error } = await supabase.functions.invoke("admin-delete-user", {
+        body: { target_user_id: deletingUser.user_id },
+        headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
+      });
+      if (error) throw error;
+      setProfiles((prev) => prev.filter((p) => p.user_id !== deletingUser.user_id));
+      setDeposits((prev) => prev.filter((d) => d.user_id !== deletingUser.user_id));
+      setWithdrawals((prev) => prev.filter((w) => w.user_id !== deletingUser.user_id));
+      toast.success(`Removed ${deletingUser.display_name || deletingUser.email || "user"} and all their history`);
+      setDeletingUser(null);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete user");
+    } finally {
+      setIsDeletingUser(false);
+    }
+  };
 
   useEffect(() => {
     const init = async () => {
@@ -443,17 +471,27 @@ const AdminDashboard = () => {
                                 <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Balance</p>
                                 <p className="text-sm font-bold text-primary">KSH {(getBalanceUsdForUser(p.user_id) * 150).toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
                               </div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-6 px-2 text-[10px] border-[hsl(280,70%,55%)] text-[hsl(280,70%,65%)] hover:bg-[hsl(280,70%,55%)] hover:text-primary-foreground"
-                                onClick={() => {
-                                  setAdjustingUserId(p.user_id);
-                                  setNewBalanceValue((getBalanceUsdForUser(p.user_id) * 150).toFixed(0));
-                                }}
-                              >
-                                <Wallet className="w-3 h-3 mr-1" /> Edit
-                              </Button>
+                              <div className="flex gap-1">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-6 px-2 text-[10px] border-[hsl(280,70%,55%)] text-[hsl(280,70%,65%)] hover:bg-[hsl(280,70%,55%)] hover:text-primary-foreground"
+                                  onClick={() => {
+                                    setAdjustingUserId(p.user_id);
+                                    setNewBalanceValue((getBalanceUsdForUser(p.user_id) * 150).toFixed(0));
+                                  }}
+                                >
+                                  <Wallet className="w-3 h-3 mr-1" /> Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-6 px-2 text-[10px] border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                                  onClick={() => setDeletingUser(p)}
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </CardContent>
@@ -850,6 +888,27 @@ const AdminDashboard = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deletingUser} onOpenChange={(open) => !open && setDeletingUser(null)}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove user permanently?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <span className="font-semibold text-foreground">{deletingUser?.display_name || deletingUser?.email}</span> along with all their deposits, withdrawals, and account history. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingUser}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); handleDeleteUser(); }}
+              disabled={isDeletingUser}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeletingUser ? <Loader2 className="w-4 h-4 animate-spin" /> : "Delete User"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
