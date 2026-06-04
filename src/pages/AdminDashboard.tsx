@@ -14,8 +14,12 @@ import {
   Users, DollarSign, TrendingUp, Clock, Search,
   LogOut, Shield, Loader2, Edit, Activity,
   UserCheck, CreditCard, ArrowUpRight, ArrowDownLeft,
-  Check, X, CheckCircle2, Phone, Wallet,
+  Check, X, CheckCircle2, Phone, Wallet, Trash2,
 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
