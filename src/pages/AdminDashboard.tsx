@@ -90,6 +90,30 @@ const AdminDashboard = () => {
   const [adjustingUserId, setAdjustingUserId] = useState<string | null>(null);
   const [newBalanceValue, setNewBalanceValue] = useState("");
   const [savingBalance, setSavingBalance] = useState(false);
+  const [deletingUser, setDeletingUser] = useState<Profile | null>(null);
+  const [isDeletingUser, setIsDeletingUser] = useState(false);
+
+  const handleDeleteUser = async () => {
+    if (!deletingUser) return;
+    setIsDeletingUser(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const { error } = await supabase.functions.invoke("admin-delete-user", {
+        body: { target_user_id: deletingUser.user_id },
+        headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
+      });
+      if (error) throw error;
+      setProfiles((prev) => prev.filter((p) => p.user_id !== deletingUser.user_id));
+      setDeposits((prev) => prev.filter((d) => d.user_id !== deletingUser.user_id));
+      setWithdrawals((prev) => prev.filter((w) => w.user_id !== deletingUser.user_id));
+      toast.success(`Removed ${deletingUser.display_name || deletingUser.email || "user"} and all their history`);
+      setDeletingUser(null);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete user");
+    } finally {
+      setIsDeletingUser(false);
+    }
+  };
 
   useEffect(() => {
     const init = async () => {
