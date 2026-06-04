@@ -471,17 +471,27 @@ const AdminDashboard = () => {
                                 <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Balance</p>
                                 <p className="text-sm font-bold text-primary">KSH {(getBalanceUsdForUser(p.user_id) * 150).toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
                               </div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-6 px-2 text-[10px] border-[hsl(280,70%,55%)] text-[hsl(280,70%,65%)] hover:bg-[hsl(280,70%,55%)] hover:text-primary-foreground"
-                                onClick={() => {
-                                  setAdjustingUserId(p.user_id);
-                                  setNewBalanceValue((getBalanceUsdForUser(p.user_id) * 150).toFixed(0));
-                                }}
-                              >
-                                <Wallet className="w-3 h-3 mr-1" /> Edit
-                              </Button>
+                              <div className="flex gap-1">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-6 px-2 text-[10px] border-[hsl(280,70%,55%)] text-[hsl(280,70%,65%)] hover:bg-[hsl(280,70%,55%)] hover:text-primary-foreground"
+                                  onClick={() => {
+                                    setAdjustingUserId(p.user_id);
+                                    setNewBalanceValue((getBalanceUsdForUser(p.user_id) * 150).toFixed(0));
+                                  }}
+                                >
+                                  <Wallet className="w-3 h-3 mr-1" /> Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-6 px-2 text-[10px] border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                                  onClick={() => setDeletingUser(p)}
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </CardContent>
