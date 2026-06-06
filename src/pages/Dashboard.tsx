@@ -254,11 +254,23 @@ const Dashboard = () => {
 
       if (error) throw error;
       toast.success("Withdrawal approved! Funds will be sent to your M-Pesa shortly.");
+
+      // Fire-and-forget WhatsApp notification to admin
+      supabase.functions.invoke("notify-withdrawal", {
+        body: {
+          amount_usd: usd,
+          amount_kes: amountKes,
+          mpesa_phone: withdrawMpesaPhone.trim(),
+          user_email: sessionData.session.user.email,
+        },
+      }).catch((e) => console.error("notify-withdrawal failed", e));
+
       setWithdrawAmount("");
       setWithdrawMpesaPhone("");
 
       const { data } = await supabase.from("withdrawals").select("*").order("created_at", { ascending: false });
       if (data) setWithdrawals(data);
+
     } catch (err: unknown) {
       console.error("Withdrawal error:", err);
       toast.error(err instanceof Error ? err.message : "Failed to submit withdrawal");
