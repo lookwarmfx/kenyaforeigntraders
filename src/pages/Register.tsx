@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,16 @@ import { toast } from "sonner";
 
 const Register = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const nextParam = searchParams.get("next");
+  const safeNext = nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : null;
+  const goNext = (fallback: string) => {
+    if (safeNext) {
+      window.location.href = safeNext;
+    } else {
+      navigate(fallback);
+    }
+  };
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -58,17 +68,17 @@ const Register = () => {
       // Auto sign-in immediately (works when email confirmation is disabled in Supabase)
       if (data.session) {
         toast.success("Account created! Welcome aboard.");
-        navigate("/dashboard");
+        goNext("/dashboard");
       } else {
         // If Supabase still requires confirmation, sign in manually
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
         if (signInError) {
           // Supabase has email confirmation enabled - inform user
           toast.success("Account created! You can now sign in.");
-          navigate("/login");
+          navigate(safeNext ? `/login?next=${encodeURIComponent(safeNext)}` : "/login");
         } else {
           toast.success("Account created! Welcome aboard.");
-          navigate("/dashboard");
+          goNext("/dashboard");
         }
       }
     } catch (err: unknown) {
@@ -148,7 +158,7 @@ const Register = () => {
             </form>
             <p className="text-center text-sm text-muted-foreground mt-4">
               Already have an account?{" "}
-              <Link to="/login" className="text-primary underline hover:text-primary/90">
+              <Link to={safeNext ? `/login?next=${encodeURIComponent(safeNext)}` : "/login"} className="text-primary underline hover:text-primary/90">
                 Sign in
               </Link>
             </p>

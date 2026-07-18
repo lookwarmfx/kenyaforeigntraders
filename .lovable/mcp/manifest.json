@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "sdk_version": "0.23.0",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://deurylywogvzxgpbunqi.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "kenya-smart-trades-mcp",
+      "version": "0.1.0",
+      "title": "Kenya Smart Trades"
+    },
+    "tools": [
+      {
+        "name": "get_balance",
+        "title": "Get balance",
+        "description": "Return the signed-in user's available balance (deposits + profits − withdrawals) in USD and KES.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_deposits",
+        "title": "List deposits",
+        "description": "List the signed-in user's deposits, most recent first.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "description": "Max rows to return (default 10)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_withdrawals",
+        "title": "List withdrawals",
+        "description": "List the signed-in user's withdrawals, most recent first.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "description": "Max rows to return (default 10)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_gold_price",
+        "title": "Get gold price",
+        "description": "Fetch the current live spot price of gold (XAU/USD) per troy ounce.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": false,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "request_withdrawal",
+        "title": "Request withdrawal",
+        "description": "Submit a withdrawal request for the signed-in user to be paid out via M-Pesa.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "amount_usd": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "Amount to withdraw in USD."
+            },
+            "mpesa_phone": {
+              "type": "string",
+              "minLength": 9,
+              "description": "M-Pesa phone number to receive the payout."
+            }
+          },
+          "required": [
+            "amount_usd",
+            "mpesa_phone"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
