@@ -104,7 +104,7 @@ const Login = () => {
             </form>
             <p className="text-center text-sm text-muted-foreground mt-4">
               Don't have an account?{" "}
-              <Link to="/register" className="text-primary underline hover:text-primary/90">
+              <Link to={safeNext ? `/register?next=${encodeURIComponent(safeNext)}` : "/register"} className="text-primary underline hover:text-primary/90">
                 Create one
               </Link>
             </p>
